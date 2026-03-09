@@ -13,7 +13,7 @@ import de.robotricker.transportpipes.location.TPDirection;
 import net.querz.nbt.tag.CompoundTag;
 import org.bukkit.Chunk;
 import org.bukkit.Material;
-import org.bukkit.Sound;
+
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 
@@ -32,7 +32,7 @@ public class IronPipe extends Pipe {
     public void notifyClick(Player p, boolean shift) {
         super.notifyClick(p, shift);
         cycleOutputDirection();
-        p.playSound(p.getLocation(), Sound.UI_BUTTON_CLICK, 1f, 1f);
+
     }
 
     public TPDirection getCurrentOutputDirection() {
