@@ -77,4 +77,5 @@ public class Protocol_1_19 implements ProtocolProvider {
         clickedFaceMaterials.add(Material.MUDDY_MANGROVE_ROOTS);
         return ProtocolProvider.super.isClickedFaceDirectional(blockData);
     }
+
 }

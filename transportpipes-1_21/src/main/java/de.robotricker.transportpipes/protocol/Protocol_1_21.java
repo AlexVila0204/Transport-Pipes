@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class Protocol_1_20 implements ProtocolProvider {
+public class Protocol_1_21 implements ProtocolProvider {
 
     @Override
     public int getMaskIndex() {
@@ -101,29 +101,30 @@ public class Protocol_1_20 implements ProtocolProvider {
         wrappedDataValueList.add(new WrappedDataValue(getMaskIndex(), WrappedDataWatcher.Registry.get(Byte.class), bitMask));
 
         Vector3f headRotation = new Vector3f(
-            (float) asd.getHeadRotation().getX(),
-            (float) asd.getHeadRotation().getY(),
-            (float) asd.getHeadRotation().getZ()
+                (float) asd.getHeadRotation().getX(),
+                (float) asd.getHeadRotation().getY(),
+                (float) asd.getHeadRotation().getZ()
         );
         wrappedDataValueList.add(new WrappedDataValue(
-            getHeadRotIndex(),
-            WrappedDataWatcher.Registry.get(Vector3f.class),
-            headRotation
+                getHeadRotIndex(),
+                WrappedDataWatcher.Registry.get(Vector3f.class),
+                headRotation
         ));
 
         Vector3f armRotation = new Vector3f(
-            (float) asd.getArmRotation().getX(),
-            (float) asd.getArmRotation().getY(),
-            (float) asd.getArmRotation().getZ()
+                (float) asd.getArmRotation().getX(),
+                (float) asd.getArmRotation().getY(),
+                (float) asd.getArmRotation().getZ()
         );
         wrappedDataValueList.add(new WrappedDataValue(
-            getRightArmRotIndex(),
-            WrappedDataWatcher.Registry.get(Vector3f.class),
-            armRotation
+                getRightArmRotIndex(),
+                WrappedDataWatcher.Registry.get(Vector3f.class),
+                armRotation
         ));
 
         entityMetadataContainer.getDataValueCollectionModifier().write(0, wrappedDataValueList);
 
         return entityMetadataContainer;
     }
+
 }
