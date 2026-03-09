@@ -14,6 +14,11 @@
                 <include>de.robotricker:transportpipes-1_17</include>
                 <include>de.robotricker:transportpipes-1_17_1</include>
                 <include>de.robotricker:transportpipes-1_19</include>
+                <include>de.robotricker:transportpipes-1_18_2</include>
+                <include>de.robotricker:transportpipes-1_19_3</include>
+                <include>de.robotricker:transportpipes-1_19_4</include>
+                <include>de.robotricker:transportpipes-1_20</include>
+                <include>de.robotricker:transportpipes-1_20_6</include>
             </includes>
             <unpack>true</unpack>
             <scope>runtime</scope>

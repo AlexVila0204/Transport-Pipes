@@ -29,6 +29,10 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
 import javax.inject.Inject;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.*;
 
 public class ItemService {
@@ -128,21 +132,74 @@ public class ItemService {
     }
 
     public ItemStack createHeadItem(String uuid, String textureValue, String textureSignature) {
-        WrappedGameProfile wrappedProfile = new WrappedGameProfile(UUID.fromString(uuid), uuid);
+        String version = Bukkit.getBukkitVersion().split("-")[0];
+
+        WrappedGameProfile wrappedProfile;
+        if (version.equals("1.20.6") || version.equals("1.21") || version.equals("1.21.1")) {
+            wrappedProfile = new WrappedGameProfile(UUID.fromString(uuid), "Player");
+        } else {
+            wrappedProfile = new WrappedGameProfile(UUID.fromString(uuid), uuid);
+        }
+
         wrappedProfile.getProperties().put("textures", new WrappedSignedProperty("textures", textureValue, textureSignature));
 
         ItemStack skull = new ItemStack(Material.PLAYER_HEAD);
         SkullMeta skullMeta = (SkullMeta) skull.getItemMeta();
-        Objects.requireNonNull(skullMeta).setOwningPlayer(Bukkit.getOfflinePlayer(UUID.fromString(uuid)));
 
-        FieldAccessor accessor = Accessors.getFieldAccessorOrNull(skullMeta.getClass(), "profile", wrappedProfile.getHandle().getClass());
-        if (accessor != null) {
-            accessor.set(skullMeta, wrappedProfile.getHandle());
+        if (!version.equals("1.20.6") && !version.equals("1.21") && !version.equals("1.21.1")) {
+            Objects.requireNonNull(skullMeta).setOwningPlayer(Bukkit.getOfflinePlayer(UUID.fromString(uuid)));
+        } else {
+            try {
+                Field profileField = skullMeta.getClass().getDeclaredField("profile");
+                profileField.setAccessible(true);
+
+                if (profileField.getType().getName().contains("ResolvableProfile")) {
+                    Class<?> resolvableProfileClass = Class.forName("net.minecraft.world.item.component.ResolvableProfile");
+
+                    try {
+                        Method fromProfileMethod = Arrays.stream(resolvableProfileClass.getDeclaredMethods())
+                                .filter(m -> Modifier.isStatic(m.getModifiers()))
+                                .filter(m -> m.getReturnType().equals(resolvableProfileClass))
+                                .filter(m -> m.getParameterCount() == 1)
+                                .filter(m -> m.getParameterTypes()[0].getName().contains("GameProfile"))
+                                .findFirst().orElse(null);
+
+                        if (fromProfileMethod != null) {
+                            fromProfileMethod.setAccessible(true);
+                            Object resolvableProfile = fromProfileMethod.invoke(null, wrappedProfile.getHandle());
+                            profileField.set(skullMeta, resolvableProfile);
+                        } else {
+                            for (Constructor<?> constructor : resolvableProfileClass.getDeclaredConstructors()) {
+                                constructor.setAccessible(true);
+                                if (constructor.getParameterCount() == 1 &&
+                                        constructor.getParameterTypes()[0].getName().contains("GameProfile")) {
+                                    Object resolvableProfile = constructor.newInstance(wrappedProfile.getHandle());
+                                    profileField.set(skullMeta, resolvableProfile);
+                                    break;
+                                }
+                            }
+                        }
+                    } catch (Exception e) {
+                        try {
+                            profileField.set(skullMeta, wrappedProfile.getHandle());
+                        } catch (Exception ex) {
+                            //I need to manage this error lol
+                        }
+                    }
+                } else {
+                    profileField.set(skullMeta, wrappedProfile.getHandle());
+                }
+            } catch (Exception e) {
+                // Need to manage this also
+            }
         }
 
         skull.setItemMeta(skullMeta);
         return skull;
     }
+
+
+
 
     public ItemStack setDuctTags(DuctType dt, ItemStack item) {
         ItemMeta itemMeta = item.getItemMeta();

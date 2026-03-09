@@ -59,10 +59,11 @@ public class TransportPipes extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        // Load protocol-specific classes
         String version = Bukkit.getBukkitVersion().split("-")[0];
+        getLogger().info("Detected Minecraft version: " + version);
         String protocolProviderClassName = TransportPipes.class.getPackage().getName() + ".protocol.Protocol_";
         String fakeBlockClassName = TransportPipes.class.getPackage().getName() + ".utils.ProtectionUtils.FakeBlock_";
+
 
         switch(version) {
             case "1.16.5":
@@ -86,8 +87,8 @@ public class TransportPipes extends JavaPlugin {
             case "1.18.1":
             case "1.18.2":
                 try {
-                    protocolProvider = (ProtocolProvider) Class.forName(protocolProviderClassName + "1_17_1").getDeclaredConstructor().newInstance();
-                    fakeBlockClass = Class.forName(fakeBlockClassName + "1_17_1");
+                    protocolProvider = (ProtocolProvider) Class.forName(protocolProviderClassName + "1_18_2").getDeclaredConstructor().newInstance();
+                    fakeBlockClass = Class.forName(fakeBlockClassName + "1_18_2");
                 } catch (InstantiationException | IllegalAccessException | ClassNotFoundException | NoSuchMethodException | InvocationTargetException e) {
                     Bukkit.getLogger().log(Level.SEVERE, "TransportPipes could not find a valid implementation for this server version.");
                 }
@@ -124,6 +125,28 @@ public class TransportPipes extends JavaPlugin {
                     protocolProvider = (ProtocolProvider) Class.forName(protocolProviderClassName + "1_20").getDeclaredConstructor().newInstance();
                     fakeBlockClass = Class.forName(fakeBlockClassName + "1_20");
                 } catch (InstantiationException | IllegalAccessException | ClassNotFoundException | NoSuchMethodException | InvocationTargetException e) {
+
+                    Bukkit.getLogger().log(Level.SEVERE, "TransportPipes could not find a valid implementation for this server version.");
+                }
+                break;
+            case "1.20.2":
+            case "1.20.3":
+            case "1.20.4":
+            case "1.20.5":
+            case "1.20.6":
+                try {
+                    protocolProvider = (ProtocolProvider) Class.forName(protocolProviderClassName + "1_20_6").getDeclaredConstructor().newInstance();
+                    fakeBlockClass = Class.forName(fakeBlockClassName + "1_20_6");
+                } catch (InstantiationException | IllegalAccessException | ClassNotFoundException | NoSuchMethodException | InvocationTargetException e) {
+                    Bukkit.getLogger().log(Level.SEVERE, "TransportPipes could not find a valid implementation for this server version.");
+                }
+                break;
+            case "1.21":
+            case "1.21.1":
+                try {
+                    protocolProvider = (ProtocolProvider) Class.forName(protocolProviderClassName + "1_21").getDeclaredConstructor().newInstance();
+                    fakeBlockClass = Class.forName(fakeBlockClassName + "1_21");
+                } catch (InstantiationException | IllegalAccessException | ClassNotFoundException | NoSuchMethodException | InvocationTargetException e) {
                     Bukkit.getLogger().log(Level.SEVERE, "TransportPipes could not find a valid implementation for this server version.");
                 }
                 break;
@@ -133,6 +156,8 @@ public class TransportPipes extends JavaPlugin {
                 getLogger().log(Level.SEVERE, "------------------------------------------");
                 Bukkit.getPluginManager().disablePlugin(this);
                 return;
+
+
         }
 
         if (Files.isRegularFile(Paths.get(getDataFolder().getPath(), "recipes.yml"))) {
@@ -163,7 +188,7 @@ public class TransportPipes extends JavaPlugin {
         //Initialize thread
         thread = injector.getSingleton(ThreadService.class);
         thread.start();
-        
+
         injector.getSingleton(ItemService.class);
 
         //Register pipe

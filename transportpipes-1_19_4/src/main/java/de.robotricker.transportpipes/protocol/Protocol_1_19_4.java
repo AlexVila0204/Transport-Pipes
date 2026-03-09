@@ -4,10 +4,9 @@ import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.reflect.StructureModifier;
-import com.comphenix.protocol.wrappers.Vector3F;
+import com.comphenix.protocol.utility.MinecraftReflection;
 import com.comphenix.protocol.wrappers.WrappedDataValue;
 import com.comphenix.protocol.wrappers.WrappedDataWatcher;
-import com.google.common.collect.Lists;
 import de.robotricker.transportpipes.TransportPipes;
 import de.robotricker.transportpipes.duct.Duct;
 import org.bukkit.Bukkit;
@@ -20,8 +19,11 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class Protocol_1_19_4 implements ProtocolProvider {
@@ -85,32 +87,102 @@ public class Protocol_1_19_4 implements ProtocolProvider {
 
     @Override
     public PacketContainer setEntityMetadata(ProtocolManager protocolManager, ArmorStandData asd) {
-        PacketContainer entityMetadataContainer = protocolManager.createPacket(PacketType.Play.Server.ENTITY_METADATA);
-        entityMetadataContainer.getModifier().writeDefaults();
-        entityMetadataContainer.getIntegers().write(0, asd.getEntityID()); // Entity ID
+        try {
+            PacketContainer entityMetadataContainer = protocolManager.createPacket(PacketType.Play.Server.ENTITY_METADATA);
+            entityMetadataContainer.getIntegers().write(0, asd.getEntityID());
+            List<WrappedDataValue> dataValues = new ArrayList<>();
+            WrappedDataWatcher.Serializer byteSerializer = WrappedDataWatcher.Registry.get(Byte.class);
+            WrappedDataWatcher.Serializer booleanSerializer = WrappedDataWatcher.Registry.get(Boolean.class);
+            Class<?> vector3fClass = MinecraftReflection.getMinecraftClass("core.Vector3f");
+            WrappedDataWatcher.Serializer vector3fSerializer = null;
 
-        byte bitMask = (byte) ((asd.isSmall() ? 0x01 : 0x00) | 0x04 | 0x08 | 0x10); // Is Small + Has Arms + No BasePlate + Marker
+            try {
+                Field[] fields = WrappedDataWatcher.Registry.class.getDeclaredFields();
+                for (Field field : fields) {
+                    field.setAccessible(true);
+                    if (field.getType() == WrappedDataWatcher.Serializer.class) {
+                        WrappedDataWatcher.Serializer serializer = (WrappedDataWatcher.Serializer) field.get(null);
+                        if (serializer != null) {
+                            try {
+                                Method getTargetMethod = WrappedDataWatcher.Serializer.class.getDeclaredMethod("getTarget");
+                                getTargetMethod.setAccessible(true);
+                                Class<?> targetClass = (Class<?>) getTargetMethod.invoke(serializer);
+                                if (targetClass != null && targetClass.equals(vector3fClass)) {
+                                    vector3fSerializer = serializer;
+                                    break;
+                                }
+                            } catch (Exception ignored) {
 
-        WrappedDataWatcher dataWatcher = new WrappedDataWatcher();
-        WrappedDataWatcher.WrappedDataWatcherObject entityMask = new WrappedDataWatcher.WrappedDataWatcherObject(0, BYTE_SERIALIZER);
-        WrappedDataWatcher.WrappedDataWatcherObject nameVisible = new WrappedDataWatcher.WrappedDataWatcherObject(3, BOOLEAN_SERIALIZER);
-        WrappedDataWatcher.WrappedDataWatcherObject asMask = new WrappedDataWatcher.WrappedDataWatcherObject(getMaskIndex(), BYTE_SERIALIZER);
-        WrappedDataWatcher.WrappedDataWatcherObject headRot = new WrappedDataWatcher.WrappedDataWatcherObject(getHeadRotIndex(), VECTOR_SERIALIZER);
-        WrappedDataWatcher.WrappedDataWatcherObject rArmRot = new WrappedDataWatcher.WrappedDataWatcherObject(getRightArmRotIndex(), VECTOR_SERIALIZER);
+                            }
+                        }
+                    }
+                }
 
-        dataWatcher.setObject(entityMask, (byte) (0x20 | 0x01)); // Invisible and on fire (to fix lighting issues)
-        dataWatcher.setObject(nameVisible, false); // Custom Name Visible
-        dataWatcher.setObject(asMask, bitMask); // Armor Stand Data
-        dataWatcher.setObject(headRot, new Vector3F((float) asd.getHeadRotation().getX(), (float) asd.getHeadRotation().getY(), (float) asd.getHeadRotation().getZ())); // Head Rotation
-        dataWatcher.setObject(rArmRot, new Vector3F((float) asd.getArmRotation().getX(), (float) asd.getArmRotation().getY(), (float) asd.getArmRotation().getZ())); // Right Arm Rotation
+                if (vector3fSerializer == null) {
+                    Object vector3f = createNMSVector3F(0, 0, 0);
+                    vector3fSerializer = WrappedDataWatcher.Registry.get(vector3f.getClass());
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
-        final List<WrappedDataValue> wrappedDataValueList = Lists.newArrayList();
-        dataWatcher.getWatchableObjects().stream().filter(Objects::nonNull).forEach(entry -> {
-            final WrappedDataWatcher.WrappedDataWatcherObject dataWatcherObject = entry.getWatcherObject();
-            wrappedDataValueList.add(new WrappedDataValue(dataWatcherObject.getIndex(), dataWatcherObject.getSerializer(), entry.getRawValue()));
-        });
-        entityMetadataContainer.getDataValueCollectionModifier().write(0, wrappedDataValueList);
+            if (vector3fSerializer == null) {
+                try {
+                    Class<?> nmsSerializerRegistry = MinecraftReflection.getMinecraftClass("network.syncher.DataWatcherRegistry");
+                    Field field = nmsSerializerRegistry.getDeclaredField("k");
+                    field.setAccessible(true);
+                    Object nmsSerializer = field.get(null);
+                    Constructor<WrappedDataWatcher.Serializer> constructor = WrappedDataWatcher.Serializer.class.getDeclaredConstructor(Object.class);
+                    constructor.setAccessible(true);
+                    vector3fSerializer = constructor.newInstance(nmsSerializer);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
 
-        return entityMetadataContainer;
+            dataValues.add(createWrappedDataValue(0, byteSerializer, (byte) (0x20 | 0x01)));
+
+            dataValues.add(createWrappedDataValue(3, booleanSerializer, false));
+
+            byte bitMask = (byte) ((asd.isSmall() ? 0x01 : 0x00) | 0x04 | 0x08 | 0x10);
+            dataValues.add(createWrappedDataValue(getMaskIndex(), byteSerializer, bitMask));
+            
+            try {
+                Object headRot = createNMSVector3F(
+                        (float) asd.getHeadRotation().getX(), 
+                        (float) asd.getHeadRotation().getY(), 
+                        (float) asd.getHeadRotation().getZ()
+                );
+                dataValues.add(createWrappedDataValue(getHeadRotIndex(), vector3fSerializer, headRot));
+
+                Object armRot = createNMSVector3F(
+                        (float) asd.getArmRotation().getX(),
+                        (float) asd.getArmRotation().getY(),
+                        (float) asd.getArmRotation().getZ()
+                );
+                dataValues.add(createWrappedDataValue(getRightArmRotIndex(), vector3fSerializer, armRot));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            
+
+            entityMetadataContainer.getDataValueCollectionModifier().write(0, dataValues);
+            
+            return entityMetadataContainer;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private WrappedDataValue createWrappedDataValue(int index, WrappedDataWatcher.Serializer serializer, Object value) {
+        return new WrappedDataValue(index, serializer, value);
+    }
+    
+    private Object createNMSVector3F(float x, float y, float z) throws Exception {
+        Class<?> vector3fClass = MinecraftReflection.getMinecraftClass("core.Vector3f");
+        Constructor<?> constructor = vector3fClass.getDeclaredConstructor(float.class, float.class, float.class);
+        constructor.setAccessible(true);
+        return constructor.newInstance(x, y, z);
     }
 }

@@ -18,10 +18,13 @@
         <module>transportpipes-1_16_5</module>
         <module>transportpipes-1_17</module>
         <module>transportpipes-1_17_1</module>
+        <module>transportpipes-1_18_2</module>
         <module>transportpipes-1_19</module>
         <module>transportpipes-1_19_3</module>
         <module>transportpipes-1_19_4</module>
         <module>transportpipes-1_20</module>
+        <module>transportpipes-1_20_6</module>
+        <module>transportpipes-1_21</module>
         <module>transportpipes-dist</module>
     </modules>
 
@@ -69,14 +72,12 @@
     <build>
         <pluginManagement>
             <plugins>
-                <!-- Generate a jar containing classes, resources and shaded libraries -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-shade-plugin</artifactId>
                     <version>3.3.1-SNAPSHOT</version>
                     <configuration>
 
-                        <!-- Relocate shaded libraries that might cause class conflicts with other plugins -->
                         <relocations>
                             <relocation>
                                 <pattern>net.querz.nbt</pattern>
@@ -155,7 +156,6 @@
                         </execution>
                     </executions>
                 </plugin>
-                <!-- Generate a javadoc jar -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-javadoc-plugin</artifactId>
@@ -177,16 +177,29 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.1</version>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-toolchains-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>toolchain</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <toolchains>
+                        <jdk>
+                            <version>${maven.compiler.release}</version>
+                        </jdk>
+                    </toolchains>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
     <repositories>
-        <!-- ProtocolLib -->
-        <repository>
-            <id>dmulloy2-repo</id>
-            <url>https://repo.dmulloy2.net/repository/public/</url>
-        </repository>
-
         <!-- ACF -->
         <repository>
             <id>aikar</id>
@@ -216,14 +229,14 @@
             <id>worldedit-repo</id>
             <url>https://maven.enginehub.org/repo/</url>
         </repository>
+
     </repositories>
 
     <dependencies>
-        <!-- ProtocolLib, spigot packet manipulation library, https://github.com/dmulloy2/ProtocolLib -->
         <dependency>
-            <groupId>com.comphenix.protocol</groupId>
+            <groupId>net.dmulloy2</groupId>
             <artifactId>ProtocolLib</artifactId>
-            <version>5.0.0-SNAPSHOT</version>
+            <version>5.4.0</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
