@@ -1,9 +1,5 @@
 package de.robotricker.transportpipes.items;
 
-import com.comphenix.protocol.reflect.accessors.Accessors;
-import com.comphenix.protocol.reflect.accessors.FieldAccessor;
-import com.comphenix.protocol.wrappers.WrappedGameProfile;
-import com.comphenix.protocol.wrappers.WrappedSignedProperty;
 import de.robotricker.transportpipes.TransportPipes;
 import de.robotricker.transportpipes.config.GeneralConf;
 import de.robotricker.transportpipes.config.LangConf;
@@ -134,64 +130,51 @@ public class ItemService {
     public ItemStack createHeadItem(String uuid, String textureValue, String textureSignature) {
         String version = Bukkit.getBukkitVersion().split("-")[0];
 
-        WrappedGameProfile wrappedProfile;
-        if (version.equals("1.20.6") || version.equals("1.21") || version.equals("1.21.1")) {
-            wrappedProfile = new WrappedGameProfile(UUID.fromString(uuid), "Player");
-        } else {
-            wrappedProfile = new WrappedGameProfile(UUID.fromString(uuid), uuid);
-        }
-
-        wrappedProfile.getProperties().put("textures", new WrappedSignedProperty("textures", textureValue, textureSignature));
+        // Create GameProfile with textures using authlib directly (via reflection)
+        // ProtocolLib's WrappedGameProfile.getProperties().put() doesn't propagate to the underlying GameProfile
+        Object gameProfile = createGameProfile(UUID.fromString(uuid), version.equals("1.20.6") || version.equals("1.21") || version.equals("1.21.1") ? "Player" : uuid, textureValue, textureSignature);
 
         ItemStack skull = new ItemStack(Material.PLAYER_HEAD);
         SkullMeta skullMeta = (SkullMeta) skull.getItemMeta();
 
-        if (!version.equals("1.20.6") && !version.equals("1.21") && !version.equals("1.21.1")) {
-            Objects.requireNonNull(skullMeta).setOwningPlayer(Bukkit.getOfflinePlayer(UUID.fromString(uuid)));
-        } else {
-            try {
-                Field profileField = skullMeta.getClass().getDeclaredField("profile");
-                profileField.setAccessible(true);
+        try {
+            Field profileField = skullMeta.getClass().getDeclaredField("profile");
+            profileField.setAccessible(true);
 
-                if (profileField.getType().getName().contains("ResolvableProfile")) {
-                    Class<?> resolvableProfileClass = Class.forName("net.minecraft.world.item.component.ResolvableProfile");
+            if (profileField.getType().getName().contains("ResolvableProfile")) {
+                Class<?> resolvableProfileClass = Class.forName("net.minecraft.world.item.component.ResolvableProfile");
 
-                    try {
-                        Method fromProfileMethod = Arrays.stream(resolvableProfileClass.getDeclaredMethods())
-                                .filter(m -> Modifier.isStatic(m.getModifiers()))
-                                .filter(m -> m.getReturnType().equals(resolvableProfileClass))
-                                .filter(m -> m.getParameterCount() == 1)
-                                .filter(m -> m.getParameterTypes()[0].getName().contains("GameProfile"))
-                                .findFirst().orElse(null);
+                try {
+                    Method fromProfileMethod = Arrays.stream(resolvableProfileClass.getDeclaredMethods())
+                            .filter(m -> Modifier.isStatic(m.getModifiers()))
+                            .filter(m -> m.getReturnType().equals(resolvableProfileClass))
+                            .filter(m -> m.getParameterCount() == 1)
+                            .filter(m -> m.getParameterTypes()[0].getName().contains("GameProfile"))
+                            .findFirst().orElse(null);
 
-                        if (fromProfileMethod != null) {
-                            fromProfileMethod.setAccessible(true);
-                            Object resolvableProfile = fromProfileMethod.invoke(null, wrappedProfile.getHandle());
-                            profileField.set(skullMeta, resolvableProfile);
-                        } else {
-                            for (Constructor<?> constructor : resolvableProfileClass.getDeclaredConstructors()) {
-                                constructor.setAccessible(true);
-                                if (constructor.getParameterCount() == 1 &&
-                                        constructor.getParameterTypes()[0].getName().contains("GameProfile")) {
-                                    Object resolvableProfile = constructor.newInstance(wrappedProfile.getHandle());
-                                    profileField.set(skullMeta, resolvableProfile);
-                                    break;
-                                }
+                    if (fromProfileMethod != null) {
+                        fromProfileMethod.setAccessible(true);
+                        Object resolvableProfile = fromProfileMethod.invoke(null, gameProfile);
+                        profileField.set(skullMeta, resolvableProfile);
+                    } else {
+                        for (Constructor<?> constructor : resolvableProfileClass.getDeclaredConstructors()) {
+                            constructor.setAccessible(true);
+                            if (constructor.getParameterCount() == 1 &&
+                                    constructor.getParameterTypes()[0].getName().contains("GameProfile")) {
+                                Object resolvableProfile = constructor.newInstance(gameProfile);
+                                profileField.set(skullMeta, resolvableProfile);
+                                break;
                             }
                         }
-                    } catch (Exception e) {
-                        try {
-                            profileField.set(skullMeta, wrappedProfile.getHandle());
-                        } catch (Exception ex) {
-                            //I need to manage this error lol
-                        }
                     }
-                } else {
-                    profileField.set(skullMeta, wrappedProfile.getHandle());
+                } catch (Exception e) {
+                    profileField.set(skullMeta, gameProfile);
                 }
-            } catch (Exception e) {
-                // Need to manage this also
+            } else {
+                profileField.set(skullMeta, gameProfile);
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
         skull.setItemMeta(skullMeta);
@@ -210,6 +193,35 @@ public class ItemService {
             item.setItemMeta(itemMeta);
         }
         return item;
+    }
+
+    /**
+     * Creates a com.mojang.authlib.GameProfile with textures using reflection
+     * to avoid ProtocolLib wrapper issues where properties don't propagate to the underlying handle.
+     */
+    private Object createGameProfile(UUID uuid, String name, String textureValue, String textureSignature) {
+        try {
+            Class<?> gameProfileClass = Class.forName("com.mojang.authlib.GameProfile");
+            Object profile = gameProfileClass.getConstructor(UUID.class, String.class).newInstance(uuid, name);
+
+            // Get PropertyMap via getProperties()
+            Method getProperties = gameProfileClass.getMethod("getProperties");
+            Object propertyMap = getProperties.invoke(profile);
+
+            // Create Property(name, value, signature)
+            Class<?> propertyClass = Class.forName("com.mojang.authlib.properties.Property");
+            Object textureProperty = propertyClass.getConstructor(String.class, String.class, String.class)
+                    .newInstance("textures", textureValue, textureSignature);
+
+            // PropertyMap extends ForwardingMultimap, use put(key, value)
+            Method put = propertyMap.getClass().getMethod("put", Object.class, Object.class);
+            put.invoke(propertyMap, "textures", textureProperty);
+
+            return profile;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     public DuctType readDuctTags(ItemStack item, DuctRegister ductRegister) {

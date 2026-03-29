@@ -19,7 +19,7 @@ import java.util.List;
 
 public class FakeBlock_1_16_5 extends FakeBlock implements Block {
 
-    public FakeBlock_1_16_5(World world, Location location) {
+    public FakeBlock_1_16_5(World world, Location location, Material material) {
         this.world = world;
         this.location = location;
         this.material = Material.HOPPER;
