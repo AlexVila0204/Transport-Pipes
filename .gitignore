@@ -150,3 +150,8 @@ toolchains.xml
 # Git
 # Don't exclude the .gitignore itself
 !.gitignore
+
+# VitePress / Docs
+node_modules/
+docs/.vitepress/dist/
+docs/.vitepress/cache/
