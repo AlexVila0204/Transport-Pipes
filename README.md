@@ -5,7 +5,7 @@ The Transport-Pipes plugin adds several pipes into Minecraft. At the moment ther
 To download release versions, visit https://github.com/AlexVila0204/Transport-Pipes/releases.
 For more detailed information read the TransportPipes wiki:
 
-<a href="https://alexvila0204.github.io/Transport-Pipes/">![Wiki](https://cdn.discordapp.com/attachments/315609061859131392/340971064937152512/Logomakr_5JxOqW.png)</a>
+**[📖 Click here to read the Official Transport-Pipes Wiki](https://alexvila0204.github.io/Transport-Pipes/)**
 
 For reporting bugs and suggestions, please open a new issue here on GitHub.
 
