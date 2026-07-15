@@ -5,6 +5,7 @@ import de.robotricker.transportpipes.config.LangConf;
 import de.robotricker.transportpipes.config.PlayerSettingsConf;
 import de.robotricker.transportpipes.rendersystems.ModelledRenderSystem;
 import de.robotricker.transportpipes.rendersystems.VanillaRenderSystem;
+import de.robotricker.transportpipes.utils.MinecraftVersion;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -24,7 +25,9 @@ import java.util.Set;
 
 public class ResourcepackService implements Listener {
 
-    private static final String URL = "https://raw.githubusercontent.com/BlackBeltPanda/Transport-Pipes/master/src/main/resources/wiki/resourcepack.zip";
+    private static final String LEGACY_URL = "https://raw.githubusercontent.com/AlexVila0204/Transport-Pipes/MultiModule/docs/public/resourcepack/resourcepack.zip";
+    private static final String MODERN_URL = "https://raw.githubusercontent.com/AlexVila0204/Transport-Pipes/MultiModule/docs/public/resourcepack/resourcepack-1_21_4.zip";
+    private static final String URL = MinecraftVersion.isAtLeast(1, 21, 4) ? MODERN_URL : LEGACY_URL;
 
     private final TransportPipes transportPipes;
     private final PlayerSettingsService playerSettingsService;
