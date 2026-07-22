@@ -25,6 +25,9 @@
         <module>transportpipes-1_20</module>
         <module>transportpipes-1_20_6</module>
         <module>transportpipes-1_21</module>
+        <module>transportpipes-1_21_3</module>
+        <module>transportpipes-1_21_4</module>
+        <module>transportpipes-1_21_5</module>
         <module>transportpipes-dist</module>
     </modules>
 

@@ -1,6 +1,7 @@
 package de.robotricker.transportpipes.items;
 
 import de.robotricker.transportpipes.TransportPipes;
+import de.robotricker.transportpipes.utils.MinecraftVersion;
 import de.robotricker.transportpipes.config.GeneralConf;
 import de.robotricker.transportpipes.config.LangConf;
 import de.robotricker.transportpipes.duct.Duct;
@@ -132,7 +133,7 @@ public class ItemService {
 
         // Create GameProfile with textures using authlib directly (via reflection)
         // ProtocolLib's WrappedGameProfile.getProperties().put() doesn't propagate to the underlying GameProfile
-        Object gameProfile = createGameProfile(UUID.fromString(uuid), version.equals("1.20.6") || version.equals("1.21") || version.equals("1.21.1") ? "Player" : uuid, textureValue, textureSignature);
+        Object gameProfile = createGameProfile(UUID.fromString(uuid), MinecraftVersion.isAtLeast(version, 1, 20, 5) ? "Player" : uuid, textureValue, textureSignature);
 
         ItemStack skull = new ItemStack(Material.PLAYER_HEAD);
         SkullMeta skullMeta = (SkullMeta) skull.getItemMeta();

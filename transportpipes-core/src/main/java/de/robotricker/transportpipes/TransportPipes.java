@@ -150,9 +150,34 @@ public class TransportPipes extends JavaPlugin {
                     Bukkit.getLogger().log(Level.SEVERE, "TransportPipes could not find a valid implementation for this server version.");
                 }
                 break;
+            case "1.21.2":
+            case "1.21.3":
+                try {
+                    protocolProvider = (ProtocolProvider) Class.forName(protocolProviderClassName + "1_21_3").getDeclaredConstructor().newInstance();
+                    fakeBlockClass = Class.forName(fakeBlockClassName + "1_21_3");
+                } catch (InstantiationException | IllegalAccessException | ClassNotFoundException | NoSuchMethodException | InvocationTargetException e) {
+                    Bukkit.getLogger().log(Level.SEVERE, "TransportPipes could not find a valid implementation for this server version.");
+                }
+                break;
+            case "1.21.4":
+                try {
+                    protocolProvider = (ProtocolProvider) Class.forName(protocolProviderClassName + "1_21_4").getDeclaredConstructor().newInstance();
+                    fakeBlockClass = Class.forName(fakeBlockClassName + "1_21_4");
+                } catch (InstantiationException | IllegalAccessException | ClassNotFoundException | NoSuchMethodException | InvocationTargetException e) {
+                    Bukkit.getLogger().log(Level.SEVERE, "TransportPipes could not find a valid implementation for this server version.");
+                }
+                break;
+            case "1.21.5":
+                try {
+                    protocolProvider = (ProtocolProvider) Class.forName(protocolProviderClassName + "1_21_5").getDeclaredConstructor().newInstance();
+                    fakeBlockClass = Class.forName(fakeBlockClassName + "1_21_5");
+                } catch (InstantiationException | IllegalAccessException | ClassNotFoundException | NoSuchMethodException | InvocationTargetException e) {
+                    Bukkit.getLogger().log(Level.SEVERE, "TransportPipes could not find a valid implementation for this server version.");
+                }
+                break;
             default:
                 getLogger().log(Level.SEVERE, "------------------------------------------");
-                getLogger().log(Level.SEVERE, "TransportPipes currently only works with Minecraft 1.16.5 through 1.20.1. You are running version " + version + ".");
+                getLogger().log(Level.SEVERE, "TransportPipes currently only works with Minecraft 1.16.5 through 1.21.5. You are running version " + version + ".");
                 getLogger().log(Level.SEVERE, "------------------------------------------");
                 Bukkit.getPluginManager().disablePlugin(this);
                 return;
