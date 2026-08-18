@@ -117,16 +117,6 @@
             <artifactId>transportpipes-1_21_5</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>transportpipes-1_21_4</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>transportpipes-1_21_5</artifactId>
-            <version>${project.version}</version>
-        </dependency>
 
     </dependencies>
     
