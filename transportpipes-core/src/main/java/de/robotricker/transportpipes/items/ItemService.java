@@ -1,5 +1,7 @@
 package de.robotricker.transportpipes.items;
 
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Multimap;
 import de.robotricker.transportpipes.TransportPipes;
 import de.robotricker.transportpipes.utils.MinecraftVersion;
 import de.robotricker.transportpipes.config.GeneralConf;
@@ -203,21 +205,27 @@ public class ItemService {
     private Object createGameProfile(UUID uuid, String name, String textureValue, String textureSignature) {
         try {
             Class<?> gameProfileClass = Class.forName("com.mojang.authlib.GameProfile");
-            Object profile = gameProfileClass.getConstructor(UUID.class, String.class).newInstance(uuid, name);
-
-            // Get PropertyMap via getProperties()
-            Method getProperties = gameProfileClass.getMethod("getProperties");
-            Object propertyMap = getProperties.invoke(profile);
-
-            // Create Property(name, value, signature)
             Class<?> propertyClass = Class.forName("com.mojang.authlib.properties.Property");
+            Class<?> propertyMapClass = Class.forName("com.mojang.authlib.properties.PropertyMap");
             Object textureProperty = propertyClass.getConstructor(String.class, String.class, String.class)
                     .newInstance("textures", textureValue, textureSignature);
 
-            // PropertyMap extends ForwardingMultimap, use put(key, value)
+            Constructor<?> recordConstructor = null;
+            try {
+                recordConstructor = gameProfileClass.getConstructor(UUID.class, String.class, propertyMapClass);
+            } catch (NoSuchMethodException ignored) {
+            }
+
+            if (recordConstructor != null) {
+                Object propertyMap = propertyMapClass.getConstructor(Multimap.class)
+                        .newInstance(ImmutableMultimap.of("textures", textureProperty));
+                return recordConstructor.newInstance(uuid, name, propertyMap);
+            }
+
+            Object profile = gameProfileClass.getConstructor(UUID.class, String.class).newInstance(uuid, name);
+            Object propertyMap = gameProfileClass.getMethod("getProperties").invoke(profile);
             Method put = propertyMap.getClass().getMethod("put", Object.class, Object.class);
             put.invoke(propertyMap, "textures", textureProperty);
-
             return profile;
         } catch (Exception e) {
             e.printStackTrace();
