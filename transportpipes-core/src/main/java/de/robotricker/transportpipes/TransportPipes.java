@@ -30,6 +30,7 @@ import de.robotricker.transportpipes.rendersystems.pipe.modelled.ModelledPipeRen
 import de.robotricker.transportpipes.rendersystems.pipe.vanilla.VanillaPipeRenderSystem;
 import de.robotricker.transportpipes.saving.DiskService;
 import de.robotricker.transportpipes.utils.LWCUtils;
+import de.robotricker.transportpipes.utils.MinecraftVersion;
 import de.robotricker.transportpipes.utils.ProtectionUtils.ProtectionUtils;
 import de.robotricker.transportpipes.utils.WorldEditUtils;
 import org.bukkit.*;
@@ -59,7 +60,7 @@ public class TransportPipes extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        String version = Bukkit.getBukkitVersion().split("-")[0];
+        String version = MinecraftVersion.current();
         getLogger().info("Detected Minecraft version: " + version);
         String protocolProviderClassName = TransportPipes.class.getPackage().getName() + ".protocol.Protocol_";
         String fakeBlockClassName = TransportPipes.class.getPackage().getName() + ".utils.ProtectionUtils.FakeBlock_";
@@ -202,9 +203,19 @@ public class TransportPipes extends JavaPlugin {
                     Bukkit.getLogger().log(Level.SEVERE, "TransportPipes could not find a valid implementation for this server version.");
                 }
                 break;
+            case "26.1":
+            case "26.1.1":
+            case "26.1.2":
+                try {
+                    protocolProvider = (ProtocolProvider) Class.forName(protocolProviderClassName + "26_1").getDeclaredConstructor().newInstance();
+                    fakeBlockClass = Class.forName(fakeBlockClassName + "26_1");
+                } catch (InstantiationException | IllegalAccessException | ClassNotFoundException | NoSuchMethodException | InvocationTargetException e) {
+                    Bukkit.getLogger().log(Level.SEVERE, "TransportPipes could not find a valid implementation for this server version.");
+                }
+                break;
             default:
                 getLogger().log(Level.SEVERE, "------------------------------------------");
-                getLogger().log(Level.SEVERE, "TransportPipes currently only works with Minecraft 1.16.5 through 1.21.10 You are running version " + version + ".");
+                getLogger().log(Level.SEVERE, "TransportPipes currently only works with Minecraft 1.16.5 through 26.1.2. You are running version " + version + ".");
                 getLogger().log(Level.SEVERE, "------------------------------------------");
                 Bukkit.getPluginManager().disablePlugin(this);
                 return;

@@ -131,7 +131,7 @@ public class ItemService {
     }
 
     public ItemStack createHeadItem(String uuid, String textureValue, String textureSignature) {
-        String version = Bukkit.getBukkitVersion().split("-")[0];
+        String version = MinecraftVersion.current();
 
         // Create GameProfile with textures using authlib directly (via reflection)
         // ProtocolLib's WrappedGameProfile.getProperties().put() doesn't propagate to the underlying GameProfile

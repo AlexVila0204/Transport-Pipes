@@ -2,14 +2,20 @@ package de.robotricker.transportpipes.utils;
 
 import org.bukkit.Bukkit;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public final class MinecraftVersion {
 
-    private static final int[] CURRENT = parse(Bukkit.getBukkitVersion().split("-")[0]);
+    private static final Pattern VERSION = Pattern.compile("^\\d+(?:\\.\\d+){0,2}");
+    private static final int[] CURRENT = parse(current());
 
     private MinecraftVersion() {}
 
     public static String current() {
-        return Bukkit.getBukkitVersion().split("-")[0];
+        String raw = Bukkit.getBukkitVersion().split("-")[0];
+        Matcher matcher = VERSION.matcher(raw);
+        return matcher.find() ? matcher.group() : raw;
     }
 
     public static boolean isAtLeast(int major, int minor, int patch) {

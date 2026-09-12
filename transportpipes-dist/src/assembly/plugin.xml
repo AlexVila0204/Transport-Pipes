@@ -26,6 +26,7 @@
                 <include>de.robotricker:transportpipes-1_21_6</include>
                 <include>de.robotricker:transportpipes-1_21_9</include>
                 <include>de.robotricker:transportpipes-1_21_11</include>
+                <include>de.robotricker:transportpipes-26_1</include>
             </includes>
             <unpack>true</unpack>
             <scope>runtime</scope>
