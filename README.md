@@ -11,9 +11,11 @@ For reporting bugs and suggestions, please open a new issue here on GitHub.
 
 ## Supported Versions
 
-This fork extends support up to **Minecraft 1.21.1**. Supported versions:
+This fork extends support up to **Minecraft 26.1.2**. Supported versions:
 
-`1.16.5` · `1.17` · `1.17.1` · `1.18.2` · `1.19` · `1.19.3` · `1.19.4` · `1.20` · `1.20.6` · `1.21` · `1.21.1`
+`1.16.5` · `1.17` · `1.17.1` · `1.18` – `1.18.2` · `1.19` – `1.19.4` · `1.20` – `1.20.6` · `1.21` – `1.21.11` · `26.1` – `26.1.2`
+
+ProtocolLib requirements per server version are listed in the [installation guide](https://alexvila0204.github.io/Transport-Pipes/tutorials/installation.html#protocollib-compatibility). Servers on 26.1+ need the ProtocolLib **5.5.0 dev build** and Java 25.
 
 
 
@@ -39,4 +41,4 @@ You can also add TransportPipes as a Maven dependency:
 
 **Originally created by [RoboTricker](https://www.spigotmc.org/members/robotricker.126658/) — see the [original repository](https://github.com/RoboTricker/Transport-Pipes).**
 **Continued and expanded by [BlackBeltPanda](https://www.spigotmc.org/members/blackbeltpanda.8320/), who picked up the project after the original was abandoned.**
-**This fork by [AlexVila0204](https://github.com/AlexVila0204) extends support through Minecraft 1.21.1.**
+**This fork by [AlexVila0204](https://github.com/AlexVila0204) extends support through Minecraft 26.1.2.**
