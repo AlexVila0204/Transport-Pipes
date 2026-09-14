@@ -4,17 +4,19 @@ This page contains the technical facts about the Transport-Pipes plugin.
 
 ## Current Version
 
-**5.5.1** — Supports Minecraft 1.16.5 through 26.1.2.
+**5.6.0** — Supports Minecraft 1.16.5 through 26.2.
 
 <details>
 <summary><b>View Changelog History</b></summary>
 
-### 5.5.1 (multi-version update)
-- Added support for Minecraft 1.21.2 through 1.21.11 and 26.1 through 26.1.2.
-- Added a 1.21.4+ resource pack using the new item model definition system; the plugin picks the right pack per server version.
-- Version-specific modules for 1.21.9+ no longer rely on versioned CraftBukkit or NMS classes, so they run on Paper builds that do not remap plugins.
-- Head item creation supports the record-based `GameProfile` introduced with authlib 7 (1.21.9+).
-- Server version detection tolerates Paper 26.x version strings (e.g. `26.1.2.build.74`).
+### 5.6.0
+- Added support for Minecraft 1.21.2 through 1.21.11, 26.1 through 26.1.2, and 26.2.
+- Added a 1.21.4+ resource pack built on the new item model definition system; the plugin sends the matching pack for the server version.
+- Modules for 1.21.9 and newer no longer depend on versioned CraftBukkit or NMS classes, so they run on Paper builds that do not remap plugins and on Spigot 26.x.
+- Head item creation supports the record-based `GameProfile` and immutable `PropertyMap` from authlib 7 (1.21.9+).
+- Server version detection tolerates Paper 26.x version strings such as `26.1.2.build.74`.
+- Fixed the 1.21/1.21.1 module missing from the distribution assembly.
+- 26.x servers require Java 25 and the ProtocolLib 5.5.0 dev build.
 
 ### 5.5.1
 - Enhanced protocol support for 1.16.5 with metadata updates and ProtocolLib compatibility.
@@ -34,7 +36,7 @@ This page contains the technical facts about the Transport-Pipes plugin.
 
 | Plugin | Notes |
 |--------|-------|
-| [ProtocolLib](https://www.spigotmc.org/resources/protocollib.1997/) | Required for pipe rendering and interaction. 5.4.0 up to 1.21.11; the [5.5.0 dev build](https://github.com/dmulloy2/ProtocolLib/releases/tag/dev-build) for 26.1+. See [Installation](../tutorials/installation.md#protocollib-compatibility). |
+| [ProtocolLib](https://www.spigotmc.org/resources/protocollib.1997/) | Required for pipe rendering and interaction. 5.4.0 up to 1.21.11; the [5.5.0 dev build](https://github.com/dmulloy2/ProtocolLib/releases/tag/dev-build) for 26.1 and newer. See [Installation](../tutorials/installation.md#protocollib-compatibility). |
 
 ## Optional Soft-Dependencies
 
