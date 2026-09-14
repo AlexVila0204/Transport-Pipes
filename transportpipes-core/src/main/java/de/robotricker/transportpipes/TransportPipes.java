@@ -206,6 +206,7 @@ public class TransportPipes extends JavaPlugin {
             case "26.1":
             case "26.1.1":
             case "26.1.2":
+            case "26.2":
                 try {
                     protocolProvider = (ProtocolProvider) Class.forName(protocolProviderClassName + "26_1").getDeclaredConstructor().newInstance();
                     fakeBlockClass = Class.forName(fakeBlockClassName + "26_1");
@@ -215,7 +216,7 @@ public class TransportPipes extends JavaPlugin {
                 break;
             default:
                 getLogger().log(Level.SEVERE, "------------------------------------------");
-                getLogger().log(Level.SEVERE, "TransportPipes currently only works with Minecraft 1.16.5 through 26.1.2. You are running version " + version + ".");
+                getLogger().log(Level.SEVERE, "TransportPipes currently only works with Minecraft 1.16.5 through 26.2. You are running version " + version + ".");
                 getLogger().log(Level.SEVERE, "------------------------------------------");
                 Bukkit.getPluginManager().disablePlugin(this);
                 return;
